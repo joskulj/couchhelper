@@ -74,8 +74,9 @@ class JSONResponse(object):
         - response
           a http responsse
         """
-        print response.read()
-        self._elements = json.loads(response.read())
+        s = response.read()
+        s = s[0:len(s) - 1]
+        self._elements = json.loads(s)
 
     def get_elements(self):
         """
@@ -203,4 +204,5 @@ class CouchDatabase(object):
         """
         uri = CouchURI()
         uri.append("_all_dbs")
-        self._http_helper.get(uri).get_elements()
+        result = self._http_helper.get(uri).get_elements()
+        return result
