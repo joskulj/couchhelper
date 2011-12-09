@@ -74,9 +74,25 @@ class JSONResponse(object):
         - response
           a http responsse
         """
+        self._ok_flag = None
+        self._error = None
+        self._elements = None
         s = response.read()
         s = s[0:len(s) - 1]
-        self._elements = json.loads(s)
+        dump = json.loads(s)
+        if type(dump) == dict:
+            if dump.has_key("ok"):
+                self._ok_flag = dump["ok"]
+            if dump.has_key("error"):
+                self._error = dump["error"]
+        self._elements = dump
+
+    def get_error(self):
+        """
+        Returns:
+        - error in the response
+        """
+        return self._error
 
     def get_elements(self):
         """
@@ -84,6 +100,13 @@ class JSONResponse(object):
         - list of elements
         """
         return self._elements
+
+    def get_ok_flag(self):
+        """
+        Returns:
+        - ok flag in the response
+        """
+        return self._ok_flag
 
 class HttpHelper(object):
     """
@@ -188,14 +211,31 @@ class CouchDatabase(object):
     Helper class to access CouchDB databases
     """
 
-    def __init__(self, host="127.0.0.1", port="5984"):
+    def __init__(self, name=None, host="127.0.0.1", port="5984"):
         """
         creates an instance
         Parameters:
+        - name
+          name of the database
         - host
-        - databases
+          host to use
+        - port
+          port to use
         """
+        self._name = name
         self._http_helper = HttpHelper(host, port)
+        if self._name:
+            if not self._name in self.get_databases():
+                flag = self.create_database()
+                if not flag:
+                    self._name = None
+
+    def get_name(self):
+        """
+        Returns:
+        - name of the database
+        """
+        return self._name
 
     def get_databases(self):
         """
@@ -206,3 +246,13 @@ class CouchDatabase(object):
         uri.append("_all_dbs")
         result = self._http_helper.get(uri).get_elements()
         return result
+
+    def create_database(self):
+        """
+        creates the database
+        """
+        uri = CouchURI()
+        uri.append(self._name)
+        result = self._http_helper.put(uri, "")
+        return result.get_ok_flag()
+
