@@ -1,5 +1,6 @@
 
 import httplib
+import json
 
 class CouchURI(object):
     """
@@ -61,6 +62,27 @@ class CouchURI(object):
             newelement = "".join(["?", element, "=", value])
         self._elements.append(newelement)
 
+class JSONResponse(object):
+    """
+    represents a JSON response
+    """
+
+    def __init__(self, source):
+        """
+        creates an instance
+        Parameters:
+        - source
+          JSON source string
+        """
+        self._elements = json.loads(source)
+
+    def get_elements(self):
+        """
+        Returns:
+        - list of elements
+        """
+        return self._elements
+
 class HttpHelper(object):
     """
     Helper class to support http communication
@@ -106,10 +128,10 @@ class HttpHelper(object):
         Returns:
         - response of the request
         """
-        c = self.connect()
+        c = self._connect()
         headers = {"Accept": "application/json"}
         c.request("GET", uri.get_uri_string(), None, headers)
-        return c.getresponse()
+        return JSONResponse(c.getresponse())
 
     def post(self, uri, body):
         """
@@ -122,10 +144,10 @@ class HttpHelper(object):
         Returns:
         - response of the request
         """
-        c = self.connect()
+        c = self._connect()
         headers = {"Content-type": "application/json"}
         c.request('POST', uri.get_uri_string(), body, headers)
-        return c.getresponse()
+        return JSONResponse(c.getresponse())
 
     def put(self, uri, body):
         """
@@ -138,13 +160,13 @@ class HttpHelper(object):
         Returns:
         - response of the request
         """
-        c = self.connect()
+        c = self._connect()
         if len(body) > 0:
             headers = {"Content-type": "application/json"}
             c.request("PUT", uri.get_uri_string(), body, headers)
         else:
             c.request("PUT", uri.get_uri_string(), body)
-        return c.getresponse()
+        return JSONResponse(c.getresponse())
 
     def delete(self, uri):
         """
@@ -155,8 +177,29 @@ class HttpHelper(object):
         Returns:
         - response of the request
         """
-        c = self.connect()
+        c = self._connect()
         c.request("DELETE", uri.get_uri_string())
-        return c.getresponse()
+        return JSONResponse(c.getresponse())
 
+class CouchDatabase(object):
+    """
+    Helper class to access CouchDB databases
+    """
 
+    def __init__(self, host="127.0.0.1", port="5984"):
+        """
+        creates an instance
+        Parameters:
+        - host
+        - databases
+        """
+        self._http_helper = HttpHelper(host, port)
+
+    def get_databases(self):
+        """
+        Returns:
+        - list of existing databases
+        """
+        uri = CouchURI()
+        uri.append("_all_dbs")
+        self._http_helper.get(uri).get_elements()
