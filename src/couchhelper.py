@@ -67,14 +67,15 @@ class JSONResponse(object):
     represents a JSON response
     """
 
-    def __init__(self, source):
+    def __init__(self, response):
         """
         creates an instance
         Parameters:
-        - source
-          JSON source string
+        - response
+          a http responsse
         """
-        self._elements = json.loads(source)
+        print response.read()
+        self._elements = json.loads(response.read())
 
     def get_elements(self):
         """
