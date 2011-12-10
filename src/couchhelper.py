@@ -206,6 +206,61 @@ class HttpHelper(object):
         c.request("DELETE", uri.get_uri_string())
         return JSONResponse(c.getresponse())
 
+class CouchDocument(object):
+    """
+    represents a CouchDB document
+    """
+
+    def __init__(self, doc_id):
+        """
+        creates an instance
+        Parameters:
+        - doc_id
+          id of the document
+        """
+        self._doc_id = doc_id
+        self._rev_id = None
+        self._values = { }
+
+    def get_doc_id(self):
+        """
+        Returns:
+        - id of the document
+        """
+        return self._doc_id
+
+    def get_rev(self):
+        """
+        Returns:
+        - revision id of the document
+        """
+        return self._rev_id
+
+    def set_value(self, key, value):
+        """
+        sets a value of the document
+        Parameters:
+        - key
+          key of the value
+        - value
+          value to set
+        """
+        self._values[key] = value
+
+    def get_value(self, key):
+        """
+        returns the value to a given key
+        Parameters:
+        - key
+          key to retrieve the value
+        Returns:
+        - value to the key
+        """
+        result = None
+        if self._values.has_key(key):
+            result = self._values[key]
+        return result
+
 class CouchDatabase(object):
     """
     Helper class to access CouchDB databases
