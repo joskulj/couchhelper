@@ -14,11 +14,14 @@ def create_database():
         print "database created."
 
 def delete_database():
-    pass
+    database = CouchDatabase("example-database")
+    if database.delete_database():
+        print "database deleted."
 
 if __name__ == "__main__":
     list_databases()
     create_database()
     list_databases()
     delete_database()
+    list_databases()
 

@@ -250,9 +250,27 @@ class CouchDatabase(object):
     def create_database(self):
         """
         creates the database
+        Returns:
+        - True: database successfully created.
+        - False: database couldn't be created.
         """
         uri = CouchURI()
         uri.append(self._name)
-        result = self._http_helper.put(uri, "")
-        return result.get_ok_flag()
+        response = self._http_helper.put(uri, "")
+        return response.get_ok_flag()
+
+    def delete_database(self):
+        """
+        deletes the database
+        Returns:
+        - True: database successfully deleted.
+        - False: database couldn't be deleted.
+        """
+        result = False
+        if self._name:
+            uri = CouchURI()
+            uri.append(self._name)
+            response = self._http_helper.delete(uri)
+            result = response.get_ok_flag()
+        return result
 
