@@ -279,6 +279,17 @@ class CouchDocument(object):
         dump_doc = json.dumps(dump_dict)
         return dump_doc
 
+    def load(self, response):
+        """
+        loads a document from a JSON response
+        Parameters:
+        - response
+          JSON response to load the documend
+        """
+        self._doc_id = response.get_elements()["_id"]
+        self._rev_id = response.get_elements()["_rev"]
+        self._values = response.get_elements()["value"]
+
 class CouchDatabase(object):
     """
     Helper class to access CouchDB databases
@@ -367,3 +378,21 @@ class CouchDatabase(object):
             result = response.get_ok_flag()
         return result
 
+    def load_document(self, doc_id):
+        """
+        loads a document from the database
+        Parameters:
+        - doc_id
+          id of the document to load
+        Returns:
+        - document or None
+        """
+        result = None
+        uri = CouchURI()
+        uri.append(self._name)
+        uri.append(doc_id)
+        response = self._http_helper.get(uri)
+        if response.get_error() == None:
+            result = CouchDocument(doc_id)
+            result.load(response)
+        return result
