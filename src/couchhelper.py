@@ -229,7 +229,7 @@ class CouchDocument(object):
         """
         return self._doc_id
 
-    def get_rev(self):
+    def get_rev_id(self):
         """
         Returns:
         - revision id of the document
@@ -260,6 +260,24 @@ class CouchDocument(object):
         if self._values.has_key(key):
             result = self._values[key]
         return result
+
+    def get_values(self):
+        """
+        Returns:
+        - dictionary of all values of the document
+        """
+        return self._values
+
+    def dump_values(self):
+        """
+        dumps the values in a JSON document
+        Returns:
+        - Couch DB document in JSON
+        """
+        dump_dict = { }
+        dump_dict["value"] = self._values
+        dump_doc = json.dumps(dump_dict)
+        return dump_doc
 
 class CouchDatabase(object):
     """
@@ -326,6 +344,26 @@ class CouchDatabase(object):
             uri = CouchURI()
             uri.append(self._name)
             response = self._http_helper.delete(uri)
+            result = response.get_ok_flag()
+        return result
+
+    def save_document(self, doc):
+        """
+        saves a document to the database
+        Parameters:
+        - doc
+          CouchDocument to save
+        Returns:
+        - True: document was saved.
+        - False: document wasn't saved.
+        """
+        result = False
+        if self._name:
+            uri = CouchURI()
+            uri.append(self._name)
+            body = doc.dump_values()
+            uri.append(doc.get_doc_id())
+            response = self._http_helper.put(uri, body)
             result = response.get_ok_flag()
         return result
 
