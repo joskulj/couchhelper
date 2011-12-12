@@ -222,6 +222,15 @@ class CouchDocument(object):
         self._rev_id = None
         self._values = { }
 
+    def set_rev_id(self, rev_id):
+        """
+        sets the revision id
+        Parameters:
+        - rev_id
+          revision id to set
+        """
+        self._rev_id = rev_id
+
     def get_doc_id(self):
         """
         Returns:
@@ -275,6 +284,8 @@ class CouchDocument(object):
         - Couch DB document in JSON
         """
         dump_dict = { }
+        if self._rev_id:
+            dump_dict["_rev"] = self._rev_id
         dump_dict["value"] = self._values
         dump_doc = json.dumps(dump_dict)
         return dump_doc
@@ -372,10 +383,14 @@ class CouchDatabase(object):
         if self._name:
             uri = CouchURI()
             uri.append(self._name)
+            body = None
             body = doc.dump_values()
             uri.append(doc.get_doc_id())
             response = self._http_helper.put(uri, body)
             result = response.get_ok_flag()
+            if result:
+                rev_id = response.get_elements()["rev"]
+                doc.set_rev_id(rev_id)
         return result
 
     def load_document(self, doc_id):

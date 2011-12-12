@@ -25,6 +25,7 @@ def create_document():
     doc.set_value("artist", "Iron Maiden")
     doc.set_value("year", "1982")
     if database.save_document(doc):
+        print doc.get_rev_id()
         print "document saved."
     else:
         print "failed to save document."
@@ -38,12 +39,20 @@ def load_document():
     print doc.get_value("artist")
     print doc.get_value("year")
 
+def update_document():
+    database = CouchDatabase("example-database")
+    doc = database.load_document("The-Number-Of-The-Beast")
+    doc.set_value("vocals", "Bruce Dickinson")
+    database.save_document(doc)
+    print doc.get_rev_id()
+ 
 if __name__ == "__main__":
     list_databases()
     create_database()
     list_databases()
     create_document()
     load_document()
+    update_document()
     # 2nd attempt should fail
     # create_document()
     # delete_database()
