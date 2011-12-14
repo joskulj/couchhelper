@@ -52,7 +52,16 @@ def update_document():
     doc.set_value("vocals", "Bruce Dickinson")
     database.save_document(doc)
     print doc.get_rev_id()
- 
+
+def delete_document():
+    print "Delete ..."
+    database = CouchDatabase("example-database")
+    doc = database.load_document("The-Number-Of-The-Beast")
+    database.delete_document(doc)
+    doc2 =  database.load_document("The-Number-Of-The-Beast")
+    if doc2 == None:
+        print "document deleted."
+
 if __name__ == "__main__":
     list_databases()
     create_database()
@@ -61,6 +70,7 @@ if __name__ == "__main__":
     list_documents()
     load_document()
     update_document()
+    delete_document()
     # 2nd attempt should fail
     # create_document()
     # delete_database()

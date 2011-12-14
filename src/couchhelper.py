@@ -412,6 +412,26 @@ class CouchDatabase(object):
             result.load(response)
         return result
 
+    def delete_document(self, doc):
+        """
+        deletes a document in the database
+        Parameters:
+        - doc
+          document to delete
+        Returns:
+        - True:  document was deleted 
+        - False: document was not deleted
+        """
+        result = False
+        uri = CouchURI()
+        uri.append(self._name)
+        uri.append(doc.get_doc_id())
+        uri.append("rev", doc.get_rev_id())
+        response = self._http_helper.delete(uri)
+        if response.get_error() == None:
+            result = True
+        return result
+
     def get_document_list(self):
         """
         retrieves a list of all documents in the database
