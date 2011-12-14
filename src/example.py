@@ -30,6 +30,13 @@ def create_document():
     else:
         print "failed to save document."
 
+def list_documents():
+    print "Documents:"
+    database = CouchDatabase("example-database")
+    doc_list = database.get_document_list()
+    for entry in doc_list:
+        print entry
+
 def load_document():
     database = CouchDatabase("example-database")
     doc = database.load_document("The-Number-Of-The-Beast")
@@ -51,6 +58,7 @@ if __name__ == "__main__":
     create_database()
     list_databases()
     create_document()
+    list_documents()
     load_document()
     update_document()
     # 2nd attempt should fail

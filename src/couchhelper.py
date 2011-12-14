@@ -411,3 +411,22 @@ class CouchDatabase(object):
             result = CouchDocument(doc_id)
             result.load(response)
         return result
+
+    def get_document_list(self):
+        """
+        retrieves a list of all documents in the database
+        Returns:
+        - list containing the id of each document in the database
+        """
+        result = None
+        uri = CouchURI()
+        uri.append(self._name)
+        uri.append("_all_docs")
+        response = self._http_helper.get(uri)
+        if response.get_error() == None:
+            result = []
+            rows = response.get_elements()["rows"]
+            for row in rows:
+                doc_id = row["id"]
+                result.append(doc_id)
+        return result
