@@ -301,6 +301,76 @@ class CouchDocument(object):
         self._rev_id = response.get_elements()["_rev"]
         self._values = response.get_elements()["value"]
 
+def CouchViewsDocument(object):
+    """
+    CouchDB design document to manage views
+    """
+
+    def __init__(self):
+        """
+        creates an instance
+        """
+        self._doc_id = "_design/views"
+        self._rev_id = None
+        self._views = { }
+
+    def set_rev_id(self):
+        """
+        sets the revision id
+        Parameters:
+        - rev_id
+          revision id to set
+        """
+        self._rev_id = rev_id
+
+    def get_rev_id(self):
+        """
+        Returns:
+        - revision in
+        """
+        return self._rev_id
+
+    def add_view(self, view_name, source):
+        """
+        adds a new view
+        Parameters:
+        - view_name
+          name of the view
+        - source
+          view source
+        """
+        self._views[view_name] = source
+
+    def dump_values(self):
+        """
+        dumps the values in a JSON document
+        Returns:
+        - Couch DB document in JSON
+        """
+        dump_dict = { }
+        dump_dict["_id"] = self._doc_id
+        if self._rev_id:
+            dump_dict["_rev"] = self._rev_id
+        views_dict = { }
+        for view_name in self._views.keys():
+            source = self._views[view_name]
+            entry_dict = {}
+            entry_dict["map"] = source
+            views_dict[view_name] = entry_dict
+        dump_dict["views"] = view_dict
+        dump_doc = json.dumps(dump_dict)
+        return dump_doc
+
+    def load(self, response):
+        """
+        loads a document from a JSON response
+        Parameters:
+        - response
+          JSON response to load the documend
+        """
+        # TODO: implement function
+        pass
+
 class CouchDatabase(object):
     """
     Helper class to access CouchDB databases
