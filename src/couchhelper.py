@@ -78,14 +78,21 @@ class JSONResponse(object):
         self._error = None
         self._elements = None
         s = response.read()
-        s = s[0:len(s) - 1]
-        dump = json.loads(s)
+        self._response_string = s[0:len(s) - 1]
+        dump = json.loads(self._response_string)
         if type(dump) == dict:
             if dump.has_key("ok"):
                 self._ok_flag = dump["ok"]
             if dump.has_key("error"):
                 self._error = dump["error"]
         self._elements = dump
+
+    def get_response_string(self):
+        """
+        Returns:
+        - response as a string
+        """
+        return self._response_string
 
     def get_error(self):
         """
@@ -301,7 +308,7 @@ class CouchDocument(object):
         self._rev_id = response.get_elements()["_rev"]
         self._values = response.get_elements()["value"]
 
-def CouchViewsDocument(object):
+class CouchViewsDocument(object):
     """
     CouchDB design document to manage views
     """
@@ -329,6 +336,13 @@ def CouchViewsDocument(object):
         - revision in
         """
         return self._rev_id
+
+    def get_views(self):
+        """
+        Returns:
+        - list of views
+        """
+        return self._views.keys()
 
     def add_view(self, view_name, source):
         """
@@ -368,14 +382,20 @@ def CouchViewsDocument(object):
         - response
           JSON response to load the documend
         """
-        # TODO: implement function
-        pass
+        self._doc_id = response.get_elements()["_id"]
+        self._rev_id = response.get_elements()["_rev"]
+        view_dict = response.get_elements()["views"]
+        self._views.clear()
+        for view_name in view_dict.keys():
+            entry_dict = view_dict[view_name]
+            source = entry_dict["map"]
+            self._views[view_name] = source
 
 class CouchDatabase(object):
     """
     Helper class to access CouchDB databases
     """
-
+    
     def __init__(self, name=None, host="127.0.0.1", port="5984"):
         """
         creates an instance
@@ -394,6 +414,46 @@ class CouchDatabase(object):
                 flag = self.create_database()
                 if not flag:
                     self._name = None
+
+    def _load_views(self):
+        """
+        loads the design document containing view definitions
+        Returns:
+        - view design documents
+        """
+        result = None
+        if self._name:
+            result = CouchViewsDocument()
+            uri = CouchURI()
+            uri.append(self._name)
+            uri.append("_design")
+            uri.append("views")
+            response = self._http_helper.get(uri)
+            if response.get_error() == None:
+                result.load(response)
+        return result
+        
+    def _save_views(self, view_doc):
+        """
+        saves or updates the design document containing view 
+        definitions
+        Paramaeters:
+        - view_dov
+          view design documents
+        Returns:
+        - True: view design document was saved
+        - False: failed to save the view document
+        """
+        pass
+
+    def _delete_views(self):
+        """
+        deletes the design document containing view definitions
+        Returns:
+        - True: view design document was deleted
+        - False: failed to delete the view design document
+        """
+        pass
 
     def get_name(self):
         """
@@ -520,3 +580,13 @@ class CouchDatabase(object):
                 doc_id = row["id"]
                 result.append(doc_id)
         return result
+
+    def get_view_list(self):
+        """
+        Returns:
+        - list of views defined for the database
+        """
+        views_doc = self._load_views()
+        return views_doc.get_views()
+
+ 
