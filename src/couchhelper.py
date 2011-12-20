@@ -1,3 +1,16 @@
+# couchhelper - Helper classes to access CouchDB databases
+#
+# Copyright 2011 Jochen Skulj, jochen@jochenskulj.de
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 
 import httplib
 import json
@@ -615,4 +628,32 @@ class CouchDatabase(object):
         views_doc = self._load_views()
         return views_doc.get_views()
 
- 
+    def query_view(self, view_name):
+        """
+        queries a view
+        Parameters:
+        - view_name
+          name of the view to query
+        Returns:
+        - list of query results
+        """
+        result = None
+        if self._name:
+            result = []
+            uri = CouchURI()
+            uri.append(self._name)
+            uri.append("_design")
+            uri.append("_views")
+            uri.append("_view")
+            uri.append(view_name)
+            response = self._http_helper.get(uri)
+            if response.get_error() == None:
+                rows = response.get_elements()["rows"]
+                print len(rows)
+                for entry in rows:
+                    result_entry = {}
+                    result_entry["id"] = entry["id"]
+                    result_entry["value"] = entry["value"]
+                    result.append(result_entry)
+        return result
+
