@@ -12,6 +12,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
+import hashlib
 import httplib
 import json
 
@@ -225,6 +226,30 @@ class HttpHelper(object):
         c = self._connect()
         c.request("DELETE", uri.get_uri_string())
         return JSONResponse(c.getresponse())
+
+class CouchKey(object):
+    """
+    Helper class to generate Document IDs
+    """
+
+    def __init__(self, value_list):
+        """
+        creates an instance
+        Parameters:
+        - value_list
+          list of values that are used to generate the key
+        """
+        m = hashlib.md5()
+        for value in value_list:
+            m.update(value)
+        self._key = m.hexdigest()
+
+    def get_key(self):
+        """
+        Returns:
+        - the key
+        """
+        return self._key
 
 class CouchDocument(object):
     """
