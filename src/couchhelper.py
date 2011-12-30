@@ -674,7 +674,6 @@ class CouchDatabase(object):
             response = self._http_helper.get(uri)
             if response.get_error() == None:
                 rows = response.get_elements()["rows"]
-                print len(rows)
                 for entry in rows:
                     result_entry = {}
                     result_entry["id"] = entry["id"]
