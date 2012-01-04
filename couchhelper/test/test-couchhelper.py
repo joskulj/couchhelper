@@ -17,7 +17,7 @@
 
 import unittest
 
-from couchhelper import *
+from couchhelper.couchhelper import *
 
 data = [
     { "artist":"Iron Maiden", "album":"Iron Maiden", "year":1980 },
